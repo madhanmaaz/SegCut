@@ -1,0 +1,306 @@
+/* helpers */
+.segcut-flex {
+    display: flex;
+    align-items: center;
+    gap: var(--segcut-gap);
+}
+
+.segcut-link {
+    color: #ff3600;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-underline-offset: 4px;
+    font-family: var(--segcut-font);
+}
+
+.segcut-link:hover {
+    color: #ff3600;
+    text-decoration: underline;
+}
+
+.segcut-hr {
+    width: 100%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: none;
+}
+
+.segcut-field {
+    display: flex;
+    align-items: center;
+    gap: var(--segcut-gap);
+    width: 100%;
+}
+
+.segcut-field input,
+.segcut-field select,
+.segcut-field textarea {
+    flex: 1;
+    font-family: var(--segcut-font);
+    font-size: 14px;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--segcut-radius);
+    border: var(--segcut-border);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--segcut-fg);
+    line-height: 1rem;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.segcut-field input:focus,
+.segcut-field select:focus,
+.segcut-field textarea:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.segcut-field select option,
+.segcut-field select optgroup {
+    background: #000;
+}
+
+.segcut-button {
+    font-size: 14px;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--segcut-radius);
+    border: var(--segcut-border);
+    color: var(--segcut-fg);
+    font-family: var(--segcut-font);
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    line-height: 1rem;
+}
+
+.segcut-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.segcut-label {
+    color: var(--segcut-fg);
+    font-family: var(--segcut-font);
+}
+
+/* =========== ROOT =========== */
+#segcut {
+    --segcut-border: 1px solid rgba(255, 255, 255, 0.12);
+    --segcut-gap: 0.5rem;
+    --segcut-fg: #e5e5e5;
+    --segcut-radius: 0.5rem;
+    --segcut-font: system-ui, -apple-system, sans-serif;
+
+    all: initial;
+    color-scheme: dark;
+    position: fixed;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    z-index: 999999;
+
+    width: 38px;
+    height: 38px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--segcut-gap);
+
+    background-color: rgba(0, 0, 0, 0.8);
+    color: var(--segcut-fg);
+    border: var(--segcut-border);
+    border-radius: var(--segcut-radius);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+    box-sizing: border-box;
+    font-size: 16px !important;
+    font-family: var(--segcut-font);
+    transition:
+        padding 0.25s ease,
+        height 0.25s ease,
+        width 0.25s ease;
+}
+
+#segcut.active {
+    width: 280px;
+    height: 60vh;
+    padding: var(--segcut-gap);
+}
+
+/* header */
+.segcut-header {
+    justify-content: space-between;
+}
+
+.segcut-header-content {
+    display: none;
+}
+
+#segcut.active .segcut-header-content {
+    display: flex;
+}
+
+/* logo */
+.segcut-logo {
+    height: 38px;
+    cursor: pointer;
+    user-select: none;
+    background: none;
+    outline: none;
+    border: none;
+}
+
+.segcut-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* segcut-content */
+.segcut-content {
+    display: none;
+    gap: var(--segcut-gap);
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+#segcut.active .segcut-content {
+    display: flex;
+}
+
+/* segcut-marker-status */
+.segcut-marker-status {
+    flex: 1;
+    text-align: right;
+    height: 16px;
+    font-family: var(--segcut-font);
+    color: var(--segcut-fg);
+}
+
+/* segcut-segments  */
+.segcut-segments {
+    counter-reset: seg;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.segcut-segments li {
+    /* @apply segcut-flex */
+    counter-increment: seg;
+
+    background: none;
+    border: none;
+    opacity: 1;
+    font-family: sans-serif !important;
+    justify-content: space-evenly;
+    font-family: var(--segcut-font);
+    color: var(--segcut-fg);
+    gap: 0.1rem;
+}
+
+.segcut-segments li::before {
+    content: counter(seg) ".";
+    font-size: 14px;
+    color: var(--segcut-fg);
+    font-family: var(--segcut-font);
+}
+
+.segcut-segments li b {
+    font-size: 14px;
+    font-weight: normal;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.1rem 0.3rem;
+    border-radius: 6px;
+}
+
+.segcut-segments li button {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-family: var(--segcut-font);
+    color: var(--segcut-fg);
+}
+
+.segcut-segment-status {
+    font-size: 14px;
+}
+
+.segcut-marker-start {
+    background-color: #9ea6ff;
+    color: #000;
+    flex: 1;
+    font-family: var(--segcut-font);
+}
+
+.segcut-marker-end {
+    background-color: #ccd0ff;
+    color: #000;
+    flex: 1;
+    font-family: var(--segcut-font);
+}
+
+.segcut-download {
+    background-color: #00d1b9;
+    color: #000;
+    font-family: var(--segcut-font);
+}
+
+#segcut small {
+    font-size: 13px;
+    color: var(--segcut-fg);
+    font-family: var(--segcut-font);
+}
+
+/* alert */
+.segcut-alert {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: var(--segcut-gap);
+}
+
+.segcut-alert.active {
+    display: flex;
+}
+
+.segcut-alert button {
+    color: red;
+    cursor: pointer;
+    border-radius: var(--segcut-radius);
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    outline: none;
+    font-family: var(--segcut-font);
+    font-weight: 600;
+    font-size: 14px;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* segcut-video-element */
+.segcut-video-element {
+    border: 3px solid #fb5607 !important;
+    transform: scale(0.98);
+}

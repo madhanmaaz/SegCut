@@ -1,0 +1,19 @@
+{
+    "name": "segcut",
+    "version": "1.0.0",
+    "description": "SegCut is a browser-based tool that lets you quickly cut and download specific segments from online videos.",
+    "license": "MIT",
+    "author": {
+        "name": "madhanmaaz",
+        "url": "git+https://github.com/madhanmaaz/segcut"
+    },
+    "type": "module",
+    "main": "main.js",
+    "scripts": {
+        "start": "node .",
+        "dev": "node --watch ."
+    },
+    "dependencies": {
+        "ws": "^8.19.0"
+    }
+}
