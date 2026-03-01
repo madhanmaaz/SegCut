@@ -352,7 +352,7 @@
             const removeBtn = li.querySelector("button");
             removeBtn.addEventListener("click", async () => {
                 this.store.parts = this.store.parts.filter(
-                    (p) => p.id !== segment.segmentId,
+                    (p) => p.segmentId !== segment.segmentId,
                 );
 
                 li.remove();
