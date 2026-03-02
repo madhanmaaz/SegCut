@@ -7,7 +7,7 @@ import fs from "node:fs";
 const PORT = 32510;
 const wss = new WebSocketServer({ port: PORT });
 
-const DOWNLOAD_DIR = path.join(os.homedir(), "Videos", "Segcut");
+const DOWNLOAD_DIR = path.join(os.homedir(), "Videos", "SegCut");
 const activeTasks = new Map();
 
 if (!fs.existsSync(DOWNLOAD_DIR)) {
@@ -134,6 +134,10 @@ async function runFFmpeg(
     }
 
     if (activeTasks.get(tabId)) {
+        console.log(
+            `${activeTasks.get(tabId)} Task already running for this tab.`,
+        );
+
         safeSend(
             ws,
             createResponse({

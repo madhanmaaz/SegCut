@@ -3,10 +3,37 @@
 </p>
 
 <p align="center">
-    SegCut is a browser-based tool that lets you quickly cut and download specific segments from online videos.
+    <strong>SegCut</strong> is a fast browser-based tool that lets you cut and download specific segments from online videos — without downloading the entire file manually.
 </p>
 
-## Prerequisites
+#### Installation
+- Windows
+```bash
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/heads/main/scripts/install.ps1 -OutFile $env:TEMP\segcut.ps1; & $env:TEMP\segcut.ps1 --install"
+```
+
+- Linux & MacOs
+```bash
+curl -fsSL https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/heads/main/scripts/install.sh | bash -s -- --install
+```
+
+#### Update
+- Windows: Open `SegCut Updater` from the Start Menu
+- Linux & macOS 
+```bash
+segcut --update
+```
+
+#### Uninstall
+- Windows: Open `SegCut Uninstaller` from the Start Menu
+- Linux & macOS 
+```bash
+segcut --uninstall
+```
+
+#### Manual Installation
+
+#### Prerequisites
 Before installing SegCut, make sure you have the following installed:
 - [Node.js](https://nodejs.org/)
     - Verify installation: `node -v` and `npm -v`
@@ -15,7 +42,7 @@ Before installing SegCut, make sure you have the following installed:
     - Make sure FFmpeg is added to your system PATH.
     - Verify installation: `ffmpeg -version`
 
-#### Installation
+#### Clone
 ```bash
 git clone https://github.com/madhanmaaz/segcut.git
 cd segcut

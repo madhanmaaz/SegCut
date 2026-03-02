@@ -139,17 +139,16 @@ function parseAttributes(line) {
     return attrs;
 }
 
-async function parseMasterPlaylist(masterUrl) {
+async function parseMasterPlaylist(tabId, masterUrl) {
     try {
+        const headers = await createHeaders(tabId, masterUrl, false);
         const res = await fetch(masterUrl, {
-            body: null,
             method: "GET",
-            mode: "cors",
-            credentials: "omit",
+            headers,
             redirect: "follow",
         });
-        const contentType = res.headers.get("content-type") || "";
 
+        const contentType = res.headers.get("content-type") || "";
         if (!STREAM_HEADERS.some((type) => contentType.includes(type))) {
             return null;
         }
@@ -243,15 +242,15 @@ async function parseMasterPlaylist(masterUrl) {
 //  Video URL Tracking
 chrome.webRequest.onCompleted.addListener(
     async (details) => {
-        if (details.tabId === -1) return;
+        const { tabId, frameId, url } = details;
+        if (tabId === -1) return;
 
-        const url = details.url;
         if (url.includes(".m3u8") || url.match(/\.(mp4|webm)(\?|$)/)) {
-            const videos = await parseMasterPlaylist(url);
+            const videos = await parseMasterPlaylist(tabId, url);
 
             if (videos) {
                 chrome.tabs.sendMessage(
-                    details.tabId,
+                    tabId,
                     {
                         type: "STREAM_URLS",
                         data: {
@@ -259,7 +258,7 @@ chrome.webRequest.onCompleted.addListener(
                         },
                     },
                     {
-                        frameId: details.frameId,
+                        frameId,
                     },
                 );
             }
@@ -268,9 +267,9 @@ chrome.webRequest.onCompleted.addListener(
     { urls: ["<all_urls>"], types: ["media", "xmlhttprequest"] },
 );
 
-async function createHeaders(tabId, videoUrl) {
+async function createHeaders(tabId, videoUrl, raw = false) {
     const tab = await chrome.tabs.get(tabId);
-    if (!tab?.url) return "";
+    if (!tab?.url) return raw ? "" : {};
 
     const pageUrl = new URL(tab.url);
     const video = new URL(videoUrl);
@@ -281,16 +280,25 @@ async function createHeaders(tabId, videoUrl) {
 
     const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
 
-    const headers = [
-        `Referer: ${tab.url}`,
-        `Origin: ${pageUrl.origin}`,
-        `User-Agent: ${navigator.userAgent}`,
-        cookieHeader ? `Cookie: ${cookieHeader}` : null,
-    ]
-        .filter(Boolean)
-        .join("\r\n");
+    const headerObject = {
+        "User-Agent": navigator.userAgent,
+        Referer: tab.url,
+        Origin: pageUrl.origin,
+    };
 
-    return headers + "\r\n";
+    if (cookieHeader) {
+        headerObject["Cookie"] = cookieHeader;
+    }
+
+    if (raw) {
+        const headerString = Object.entries(headerObject)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join("\r\n");
+
+        return headerString + "\r\n";
+    }
+
+    return headerObject;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -314,24 +322,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 }
 
                 const preResponse = await fetch(message.data.videoUrl, {
-                    headers: {
-                        accept: "*/*",
-                        "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-                        priority: "u=1, i",
-                        "sec-fetch-dest": "empty",
-                        "sec-fetch-mode": "cors",
-                        "sec-fetch-site": "none",
-                        "sec-fetch-storage-access": "active",
-                        "sec-gpc": "1",
-                    },
-                    body: null,
                     method: "HEAD",
                     mode: "cors",
                     credentials: "omit",
                     redirect: "follow",
                 });
 
-                const headers = await createHeaders(tabId, preResponse.url);
+                const headers = await createHeaders(
+                    tabId,
+                    preResponse.url,
+                    true,
+                );
 
                 const payload = {
                     type: message.type,
