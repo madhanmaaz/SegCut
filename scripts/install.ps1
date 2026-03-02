@@ -241,7 +241,7 @@ function Uninstall-SegCut {
 # Entry Point
 # -------------------
 switch ($Action) {
+    "install" { Install-SegCut }
     "update"    { Update-SegCut }
     "uninstall" { Uninstall-SegCut }
-    default { Install-SegCut }
 }
