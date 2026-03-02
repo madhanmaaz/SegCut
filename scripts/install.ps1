@@ -20,7 +20,7 @@ $packageJsonUrl = "https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/head
 $installRoot    = "$env:LOCALAPPDATA\Programs\$appName"
 $ffmpegRoot     = "$env:LOCALAPPDATA\Programs\ffmpeg"
 $startMenuPath  = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\$appName"
-$scriptPath     = $scriptPath = $MyInvocation.MyCommand.Path
+$scriptPath     = "$installRoot\scripts\install.ps1"
 
 $tempZip        = "$env:TEMP\segcut.zip"
 $tempExtract    = "$env:TEMP\segcut_extract"
@@ -205,7 +205,7 @@ function Update-SegCut {
 
     if ($localVersion -and $localVersion -eq $remoteVersion) {
         Write-Step "Already up to date (v$localVersion)"
-        pause
+        [void][System.Console]::ReadLine()
         return
     }
 
@@ -216,7 +216,7 @@ function Update-SegCut {
     npm install --silent
 
     Write-Step "Update complete!"
-    pause
+    [void][System.Console]::ReadLine()
 }
 
 # -------------------
@@ -234,14 +234,14 @@ function Uninstall-SegCut {
     }
 
     Write-Step "$appName removed successfully"
-    pause
+    [void][System.Console]::ReadLine()
 }
 
 # -------------------
 # Entry Point
 # -------------------
 switch ($Action) {
-    "install"   { Install-SegCut }
     "update"    { Update-SegCut }
     "uninstall" { Uninstall-SegCut }
+    default { Install-SegCut }
 }
