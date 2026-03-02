@@ -42,7 +42,6 @@ function Clean-Temp {
 # -------------------
 function Download-And-Extract {
     Write-Step "Downloading latest version..."
-
     Clean-Temp
 
     Invoke-WebRequest -Uri $repoZipUrl -OutFile $tempZip
@@ -51,11 +50,11 @@ function Download-And-Extract {
     $sourceFolder = Get-ChildItem $tempExtract | Where-Object { $_.PSIsContainer } | Select-Object -First 1
 
     if (Test-Path $installRoot) {
-        New-Item -ItemType Directory -Path $installRoot | Out-Null
+        Remove-Item $installRoot -Recurse -Force
     }
 
+    New-Item -ItemType Directory -Path $installRoot | Out-Null
     Copy-Item "$($sourceFolder.FullName)\*" $installRoot -Recurse -Force
-
     Clean-Temp
 }
 
