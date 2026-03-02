@@ -49,12 +49,22 @@ function Download-And-Extract {
 
     $sourceFolder = Get-ChildItem $tempExtract | Where-Object { $_.PSIsContainer } | Select-Object -First 1
 
+    # Ensure install directory exists and is a directory
     if (Test-Path $installRoot) {
-        Remove-Item $installRoot -Recurse -Force
+        if (-not (Test-Path $installRoot -PathType Container)) {
+            Remove-Item $installRoot -Force
+            New-Item -ItemType Directory -Path $installRoot | Out-Null
+        }
+        else {
+            # Clear existing contents safely
+            Get-ChildItem $installRoot -Force | Remove-Item -Recurse -Force
+        }
+    }
+    else {
+        New-Item -ItemType Directory -Path $installRoot | Out-Null
     }
 
-    New-Item -ItemType Directory -Path $installRoot | Out-Null
-    Copy-Item "$($sourceFolder.FullName)\*" $installRoot -Recurse -Force
+    Copy-Item -Path "$($sourceFolder.FullName)\*" -Destination $installRoot -Recurse -Force
     Clean-Temp
 }
 
