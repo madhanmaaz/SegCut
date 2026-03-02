@@ -216,6 +216,7 @@ function Update-SegCut {
     npm install --silent
 
     Write-Step "Update complete!"
+    pause
 }
 
 # -------------------
@@ -233,6 +234,7 @@ function Uninstall-SegCut {
     }
 
     Write-Step "$appName removed successfully"
+    pause
 }
 
 # -------------------
