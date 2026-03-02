@@ -55,6 +55,40 @@
         return result;
     }
 
+    function sanitizeFilename(name) {
+        return name
+            .replace(/[^a-z0-9.\-_]/gi, "_")
+            .replace(/_+/g, "_")
+            .replace(/^_+|_+$/g, "");
+    }
+
+    function getFilenameFromUrl(url) {
+        if (!url) return null;
+
+        try {
+            const parsed = new URL(url);
+
+            // Check common query params first
+            const params = ["filename", "file", "name", "title"];
+            for (const key of params) {
+                const value = parsed.searchParams.get(key);
+                if (value) return sanitizeFilename(value);
+            }
+
+            // Extract from pathname
+            let filename = parsed.pathname.split("/").pop();
+
+            if (!filename) return null;
+
+            // Remove query leftovers
+            filename = filename.split("?")[0];
+
+            return filename;
+        } catch {
+            return null;
+        }
+    }
+
     class SegCut {
         constructor() {
             this.panel = null;
@@ -69,6 +103,7 @@
                 pageUrl: location.href,
                 videoUrl: null,
                 parts: [],
+                filename: null,
             };
 
             this.VIDEOS = "videos";
@@ -208,6 +243,9 @@
                     this.videoElement = this.blobElement;
                 }
 
+                this.store.filename = sanitizeFilename(
+                    selected.filename || document.title,
+                );
                 this.store.videoUrl = selected.url ?? null;
                 this.videoSelector.blur();
                 this.updateMarkerStatus(`> ${selected.name}`);
@@ -437,6 +475,7 @@
                     element: video,
                     videoId: randomString(),
                     name: video.id || `Video ${i + 1}`,
+                    filename: getFilenameFromUrl(url),
                 });
             }
 
@@ -473,20 +512,27 @@
         switch (response.type) {
             case "TOGGLE_SEGCUT": {
                 const { enabled } = response.data;
-                const host = new URL(location.href).hostname;
-                const { enabledHosts = {} } =
-                    await chrome.storage.local.get("enabledHosts");
 
                 if (enabled) {
                     instance.activate();
-
-                    enabledHosts[host] = true;
                 } else {
                     instance.deactivate();
-                    delete enabledHosts[host];
                 }
 
-                await chrome.storage.local.set({ enabledHosts });
+                if (isIframe()) {
+                    const host = new URL(location.href).hostname;
+                    const { enabledHosts = {} } =
+                        await chrome.storage.local.get("enabledHosts");
+
+                    if (enabled) {
+                        enabledHosts[host] = true;
+                    } else {
+                        delete enabledHosts[host];
+                    }
+
+                    await chrome.storage.local.set({ enabledHosts });
+                }
+
                 break;
             }
         }

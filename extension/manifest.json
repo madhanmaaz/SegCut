@@ -5,7 +5,7 @@
     "version": "1.0",
     "description": "Mark and cut precise video segments from any website.",
 
-    "permissions": ["tabs", "storage", "webRequest"],
+    "permissions": ["tabs", "storage", "webRequest", "cookies"],
     "host_permissions": ["<all_urls>"],
 
     "icons": {
@@ -32,7 +32,8 @@
             "all_frames": true,
             "matches": ["<all_urls>"],
             "js": ["content.js"],
-            "css": ["content.css"]
+            "css": ["content.css"],
+            "run_at": "document_end"
         }
     ]
 }

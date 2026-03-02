@@ -2,24 +2,16 @@ import { spawn } from "node:child_process";
 import { WebSocketServer } from "ws";
 import path from "node:path";
 import os from "node:os";
-
-import config from "./config.json" with { type: "json" };
 import fs from "node:fs";
 
 const PORT = 32510;
 const wss = new WebSocketServer({ port: PORT });
 
-const DOWNLOAD_DIR =
-    config.downloadFolder || path.join(os.homedir(), "Downloads");
-const userAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36`;
+const DOWNLOAD_DIR = path.join(os.homedir(), "Videos", "Segcut");
 const activeTasks = new Map();
 
-function createDir(filepath) {
-    const folder = path.dirname(filepath);
-
-    if (!fs.existsSync(folder)) {
-        fs.mkdirSync(folder, { recursive: true });
-    }
+if (!fs.existsSync(DOWNLOAD_DIR)) {
+    fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
 }
 
 function createResponse({
@@ -44,15 +36,43 @@ function safeSend(ws, payload) {
     }
 }
 
-function buildArgs({ start, end, videoUrl, outputPath }) {
+function buildFilePath({ dir, filename, start, end, extension = ".mp4" }) {
+    if (!filename) filename = "video";
+
+    // Remove extension if already present
+    filename = filename.replace(/\.[^/.]+$/, "");
+
+    // Convert 00:00:05 → 00-00-05 (safe for Windows)
+    const safeStart = start.replace(/:/g, "-");
+    const safeEnd = end.replace(/:/g, "-");
+
+    const baseName = `${filename}_${safeStart}_${safeEnd}`;
+
+    let filePath = path.join(dir, baseName + extension);
+
+    let counter = 1;
+
+    // Prevent overwrite
+    while (fs.existsSync(filePath)) {
+        filePath = path.join(dir, `${baseName}_${counter}${extension}`);
+        counter++;
+    }
+
+    return filePath;
+}
+
+function buildArgs({ start, end, videoUrl, outputPath, headers }) {
     const base = [
         "-y",
+
         "-ss",
         start,
         "-to",
         end,
-        "-user_agent",
-        userAgent,
+
+        "-headers",
+        headers,
+
         "-i",
         videoUrl,
     ];
@@ -70,9 +90,9 @@ function buildArgs({ start, end, videoUrl, outputPath }) {
     ];
 }
 
-function runSegment({ videoUrl, start, end, outputPath }) {
+function runSegment({ videoUrl, start, end, outputPath, headers }) {
     return new Promise((resolve, reject) => {
-        const args = buildArgs({ start, end, videoUrl, outputPath });
+        const args = buildArgs({ start, end, videoUrl, outputPath, headers });
         console.log("> ffmpeg", args.join(" "));
 
         const ffmpeg = spawn("ffmpeg", args);
@@ -88,7 +108,10 @@ function runSegment({ videoUrl, start, end, outputPath }) {
     });
 }
 
-async function runFFmpeg(ws, { tabId, frameId, videoUrl, parts }) {
+async function runFFmpeg(
+    ws,
+    { tabId, frameId, videoUrl, parts, headers, filename },
+) {
     if (
         typeof tabId === "undefined" ||
         typeof frameId !== "number" ||
@@ -132,28 +155,12 @@ async function runFFmpeg(ws, { tabId, frameId, videoUrl, parts }) {
         for (let i = 0; i < parts.length; i++) {
             const { start, end, segmentId } = parts[i];
 
-            const outputPath = path.join(
-                DOWNLOAD_DIR,
-                `${segmentId}_${i + 1}${config.outputExt}`,
-            );
-
-            createDir(outputPath);
-
-            if (fs.existsSync(outputPath)) {
-                safeSend(
-                    ws,
-                    createResponse({
-                        type: "SEGMENT_STATUS",
-                        data: {
-                            tabId,
-                            segmentId,
-                            status: "DONE",
-                            frameId,
-                        },
-                    }),
-                );
-                continue;
-            }
+            const outputPath = buildFilePath({
+                dir: DOWNLOAD_DIR,
+                filename,
+                start,
+                end,
+            });
 
             safeSend(
                 ws,
@@ -169,7 +176,7 @@ async function runFFmpeg(ws, { tabId, frameId, videoUrl, parts }) {
             );
 
             try {
-                await runSegment({ videoUrl, start, end, outputPath });
+                await runSegment({ videoUrl, start, end, outputPath, headers });
 
                 safeSend(
                     ws,
