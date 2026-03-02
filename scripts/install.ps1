@@ -157,7 +157,6 @@ function Create-StartMenuShortcuts {
     $removeShortcut = $WshShell.CreateShortcut("$startMenuPath\$appName Uninstaller.lnk")
     $removeShortcut.TargetPath = "powershell"
     $removeShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`" -Action uninstall"
-    $removeShortcut.WorkingDirectory = $installRoot
     $removeShortcut.IconLocation = "$installRoot\icon.ico"
     $removeShortcut.Save()
 
