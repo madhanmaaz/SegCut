@@ -34,5 +34,5 @@ npm install
 #### Screenshot
 
 <p align="center">
-    <img src="./banner.webp" />
+    <img src="./screenshot.webp" />
 </p>

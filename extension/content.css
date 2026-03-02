@@ -81,6 +81,18 @@
     cursor: not-allowed;
 }
 
+.segcut-button.segcut-button-square {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    font-family: var(--segcut-font);
+    color: var(--segcut-fg);
+}
+
 .segcut-label {
     color: var(--segcut-fg);
     font-family: var(--segcut-font);
@@ -227,18 +239,6 @@
     border-radius: 6px;
 }
 
-.segcut-segments li button {
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    background-color: rgba(255, 255, 255, 0.1);
-    font-family: var(--segcut-font);
-    color: var(--segcut-fg);
-}
-
 .segcut-segment-status {
     font-size: 14px;
 }
@@ -257,8 +257,14 @@
     font-family: var(--segcut-font);
 }
 
+.segcut-marker-full {
+    background-color: #ccd0ff;
+    color: #000;
+    font-family: var(--segcut-font);
+}
+
 .segcut-download {
-    background-color: #00d1b9;
+    background-color: #24baff;
     color: #000;
     font-family: var(--segcut-font);
 }
@@ -282,21 +288,6 @@
 
 .segcut-alert.active {
     display: flex;
-}
-
-.segcut-alert button {
-    color: red;
-    cursor: pointer;
-    border-radius: var(--segcut-radius);
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    border: none;
-    outline: none;
-    font-family: var(--segcut-font);
-    font-weight: 600;
-    font-size: 14px;
-    background-color: rgba(0, 0, 0, 0.8);
 }
 
 /* segcut-video-element */

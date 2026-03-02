@@ -165,6 +165,10 @@
                         <button class="segcut-button segcut-marker-end">
                             End
                         </button>
+
+                        <button class="segcut-button segcut-marker-full">
+                            Full
+                        </button>
                     </div>
 
                     <button class="segcut-button segcut-download">
@@ -175,7 +179,7 @@
                 <div class="segcut-alert">
                     <div class="segcut-flex">
                         <p>message</p>
-                        <button>x</button>
+                        <button class="segcut-button segcut-button-square">x</button>
                     </div>
                 </div>
             `;
@@ -192,6 +196,7 @@
                 ".segcut-marker-start",
             );
             const markerEnd = this.panel.querySelector(".segcut-marker-end");
+            const markerFull = this.panel.querySelector(".segcut-marker-full");
             const alertClose = this.panel.querySelector(".segcut-alert button");
 
             this.videoSelector = this.panel.querySelector(
@@ -277,22 +282,19 @@
                     return;
                 }
 
-                const segment = {
-                    segmentId: `seg_${randomString()}`,
-                    start: formatTime(this.currentStart),
-                    end: formatTime(endTime),
-                };
-
-                this.store.parts.push(segment);
-                this.renderSegment(segment);
+                await this.addSegment(this.currentStart, endTime);
                 this.currentStart = null;
+            });
 
-                await this.saveDraft();
-                this.updateMarkerStatus("✔ Segment Added");
+            markerFull.addEventListener("click", async () => {
+                if (!this.videoElement || !this.store.videoUrl) {
+                    return this.updateMarkerStatus("! Select Video or Stream.");
+                }
+
+                await this.addSegment(0, this.videoElement.duration);
             });
 
             downloadBtn.addEventListener("click", () => {
-                chrome.runtime.sendMessage({});
                 if (!this.videoElement || !this.store.videoUrl) {
                     return this.updateMarkerStatus("! Select Video or Stream.");
                 }
@@ -377,6 +379,30 @@
             return groupElement;
         }
 
+        async addSegment(startTime, endTime) {
+            const segment = {
+                segmentId: `seg_${randomString()}`,
+                start: formatTime(startTime),
+                end: formatTime(endTime),
+            };
+
+            const exists = this.store.parts.some(
+                (part) =>
+                    part.start === segment.start && part.end === segment.end,
+            );
+
+            if (exists) {
+                this.updateMarkerStatus("⚠ Segment already exists");
+                return;
+            }
+
+            this.store.parts.push(segment);
+            this.renderSegment(segment);
+
+            await this.saveDraft();
+            this.updateMarkerStatus("✔ Segment Added");
+        }
+
         renderSegment(segment) {
             const li = document.createElement("li");
             li.className = "segcut-flex";
@@ -384,7 +410,7 @@
             li.innerHTML = `
                 <span class="segcut-segment-status">📌</span>
                 <b>${segment.start}</b> - <b>${segment.end}</b>
-                <button class="segcut-button">x</button>
+                <button class="segcut-button segcut-button-square"><p>x</p></button>
             `;
 
             const removeBtn = li.querySelector("button");
