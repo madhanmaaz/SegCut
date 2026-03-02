@@ -11,7 +11,7 @@ Run the following command in your terminal:
 
 - Windows
 ```bash
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$p='$env:TEMP\segcut.ps1'; iwr https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/heads/main/scripts/install.ps1 -OutFile $p; & $p -Action install"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/heads/main/scripts/install.ps1 -OutFile $env:TEMP\segcut.ps1; & $env:TEMP\segcut.ps1 -Action install"
 ```
 
 - Linux & MacOs
