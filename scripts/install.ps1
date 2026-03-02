@@ -4,7 +4,7 @@
 
 param (
     [Parameter(Mandatory = $true)]
-    [ValidateSet("--install", "--update", "--uninstall")]
+    [ValidateSet("install", "update", "uninstall")]
     [string]$Action
 )
 
@@ -19,8 +19,8 @@ $packageJsonUrl = "https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/head
 
 $installRoot    = "$env:LOCALAPPDATA\Programs\$appName"
 $ffmpegRoot     = "$env:LOCALAPPDATA\Programs\ffmpeg"
-$scriptPath     = "$installRoot\scripts\install.ps1"
 $startMenuPath  = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\$appName"
+$scriptPath     = $scriptPath = $MyInvocation.MyCommand.Path
 
 $tempZip        = "$env:TEMP\segcut.zip"
 $tempExtract    = "$env:TEMP\segcut_extract"
@@ -51,10 +51,9 @@ function Download-And-Extract {
     $sourceFolder = Get-ChildItem $tempExtract | Where-Object { $_.PSIsContainer } | Select-Object -First 1
 
     if (Test-Path $installRoot) {
-        Remove-Item $installRoot -Recurse -Force
+        New-Item -ItemType Directory -Path $installRoot | Out-Null
     }
 
-    New-Item -ItemType Directory -Path $installRoot | Out-Null
     Copy-Item "$($sourceFolder.FullName)\*" $installRoot -Recurse -Force
 
     Clean-Temp
@@ -64,7 +63,8 @@ function Download-And-Extract {
 # Node.js
 # -------------------
 function Ensure-Node {
-    if (Get-Command node -ErrorAction SilentlyContinue) {
+    if ((Get-Command node -ErrorAction SilentlyContinue) -and
+        (Get-Command npm -ErrorAction SilentlyContinue)) {
         Write-Step "Node.js already installed"
         return
     }
@@ -139,7 +139,7 @@ function Create-StartMenuShortcuts {
     # Updater
     $updateShortcut = $WshShell.CreateShortcut("$startMenuPath\$appName Updater.lnk")
     $updateShortcut.TargetPath = "powershell"
-    $updateShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`" --update"
+    $updateShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`" -Action update"
     $updateShortcut.WorkingDirectory = $installRoot
     $updateShortcut.IconLocation = "$installRoot\icon.ico"
     $updateShortcut.Save()
@@ -147,7 +147,7 @@ function Create-StartMenuShortcuts {
     # Uninstaller
     $removeShortcut = $WshShell.CreateShortcut("$startMenuPath\$appName Uninstaller.lnk")
     $removeShortcut.TargetPath = "powershell"
-    $removeShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`" --uninstall"
+    $removeShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$scriptPath`" -Action uninstall"
     $removeShortcut.WorkingDirectory = $installRoot
     $removeShortcut.IconLocation = "$installRoot\icon.ico"
     $removeShortcut.Save()
@@ -230,7 +230,7 @@ function Uninstall-SegCut {
 # Entry Point
 # -------------------
 switch ($Action) {
-    "--install"   { Install-SegCut }
-    "--update"    { Update-SegCut }
-    "--uninstall" { Uninstall-SegCut }
+    "install"   { Install-SegCut }
+    "update"    { Update-SegCut }
+    "uninstall" { Uninstall-SegCut }
 }

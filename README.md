@@ -7,6 +7,8 @@
 </p>
 
 #### Installation
+Run the following command in your terminal:
+
 - Windows
 ```bash
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/madhanmaaz/SegCut/refs/heads/main/scripts/install.ps1 -OutFile $env:TEMP\segcut.ps1; & $env:TEMP\segcut.ps1 --install"
