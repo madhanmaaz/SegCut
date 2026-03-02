@@ -206,6 +206,7 @@ function Update-SegCut {
 
     if ($localVersion -and $localVersion -eq $remoteVersion) {
         Write-Step "Already up to date (v$localVersion)"
+        pause
         return
     }
 
